@@ -202,7 +202,9 @@ impl MirrorFilter {
 		Ok(Self::Country(
 			countries
 				.into_iter()
-				.map(|c| c.as_ref().parse().map(|c: Country| c.alpha2))
+				.map(|c| {
+					c.as_ref().parse().map(|c: Country| c.alpha2.to_string())
+				})
 				.collect::<Result<_, _>>()?,
 		))
 	}

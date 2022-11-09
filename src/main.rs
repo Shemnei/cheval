@@ -191,7 +191,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	if let Some(countries) = opt.countries {
 		filter = filter.and(MirrorFilter::Country(
-			countries.into_iter().map(|c| c.alpha2).collect(),
+			countries.into_iter().map(|c| c.alpha2.to_string()).collect(),
 		));
 	}
 
