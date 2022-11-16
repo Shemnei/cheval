@@ -32,83 +32,68 @@
 use std::ffi::OsString;
 use std::io::Write as _;
 use std::path::Path;
-use std::str::FromStr;
 use std::time::SystemTime;
 
 use celes::Country;
 use cheval::{MirrorFilter, MirrorList, MirrorScore};
 use chrono::Local;
-use structopt::StructOpt;
+use clap::{Parser, ValueEnum};
 
 const DEFAULT_STATUS_URL: &str = "https://archlinux.org/mirrors/status/json/";
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
+#[command(author, version, about, long_about = None)]
 pub struct Opt {
 	/// URL for the mirror status json endpoint.
-	#[structopt(short, long, default_value = DEFAULT_STATUS_URL)]
+	#[arg(short, long, default_value = DEFAULT_STATUS_URL)]
 	url: String,
 
 	/// Amount of secons a cached status file is valid.
-	#[structopt(long, default_value = "3600")]
+	#[arg(long, default_value = "3600")]
 	cache_secs: u64,
 
 	/// List of countries either as full name, alpha2 or alpha3 iso code.
 	///
 	/// The case of the input does not matter.
 	/// Examples: `United States`, `US`, `USA`.
-	#[structopt(short, long)]
+	#[arg(short, long)]
 	countries: Option<Vec<Country>>,
 
 	/// Mirror must support http.
-	#[structopt(long)]
+	#[arg(long)]
 	http: bool,
 
 	/// Mirror must support https.
-	#[structopt(long)]
+	#[arg(long)]
 	https: bool,
 
 	/// Mirror must support ipv4 addresses.
-	#[structopt(short = "4", long)]
+	#[arg(short = '4', long)]
 	ipv4: bool,
 
 	/// Mirror must support ipv6 addresses.
-	#[structopt(short = "6", long)]
+	#[arg(short = '6', long)]
 	ipv6: bool,
 
 	/// Sort the mirrors after filtering.
-	#[structopt(short, long)]
+	#[arg(short, long, value_enum)]
 	sort: Option<Sorter>,
 
 	/// Only take the best/first n mirrors after filtering and sorting.
-	#[structopt(short, long)]
+	#[arg(short, long)]
 	take: Option<usize>,
 
 	/// The generated mirrorlist will be written to this output.
-	#[structopt(short, long)]
+	#[arg(short, long)]
 	output: Option<OsString>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ValueEnum)]
 pub enum Sorter {
 	/// Ping the mirror and sort by fastest response.
 	Ping,
 	/// Sort by best score (taken from the mirror status page).
 	Score,
-}
-
-impl FromStr for Sorter {
-	type Err = String;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s.to_lowercase().as_str() {
-			"ping" => Ok(Self::Ping),
-			"score" => Ok(Self::Score),
-			_ => {
-				Err("Invalid sorter, allowed values are `score` and `ping`"
-					.into())
-			}
-		}
-	}
 }
 
 const ENV_CACHE_DIR: &str = "XDG_CACHE_HOME";
@@ -167,7 +152,7 @@ fn write_cache(json: &str) -> Result<(), std::io::Error> {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 	//Opt::clap().gen_completions(env!("CARGO_PKG_NAME"), structopt::clap::Shell::Zsh, "target");
 
-	let opt = Opt::from_args();
+	let opt = Opt::parse();
 
 	let (cache, status_json) = match load_cached(opt.cache_secs) {
 		Ok(json) => (true, json),
