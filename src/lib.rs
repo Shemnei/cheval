@@ -387,11 +387,19 @@ impl MirrorScore {
 				(None, None) => None,
 				(None, Some(_)) => Some(Ordering::Greater),
 				(Some(_), None) => Some(Ordering::Less),
-				(Some(a), Some(b)) => a.partial_cmp(b),
+				(Some(a), Some(b)) => self.cmp(a, b),
 			}
 			.unwrap_or(Ordering::Equal)
 		});
 		scored
+	}
+
+	fn cmp(&self, a: &f32, b: &f32) -> Option<Ordering> {
+		match self {
+			// Lower score is best
+			// Lower ping is best
+			Self::Score | Self::GetLastSync => a.partial_cmp(b),
+		}
 	}
 }
 
