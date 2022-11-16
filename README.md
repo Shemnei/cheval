@@ -26,7 +26,7 @@ Filter mirrors by some criteria.
 
 Score and then sort mirrors.
 
-- Score given by the [Mirror Status Page](arch_mirror_status)
+- Score given by the [Mirror Status Page](https://archlinux.org/mirrors/status/). Lower is better.
 - Round trip time for a http get request
 
 ### Take
@@ -46,8 +46,5 @@ To force a refresh of the list call the tool with the argument `--cache-secs 0`.
 
 ## Links
 
-- [Mirror Status](arch_mirror_status)
+- [Mirror Status](https://archlinux.org/mirrors/status/)
 - [Mirror Status json Interface](https://archlinux.org/mirrors/status/json/)
-
-
-[arch_mirror_status]: https://archlinux.org/mirrors/status/
