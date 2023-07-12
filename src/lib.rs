@@ -71,7 +71,7 @@ pub struct Mirror {
 	///  e.g. the mean value of last check − last sync for each check of this
 	///  mirror URL. Due to the timing of mirror checks,
 	///  any value under one hour should be viewed as ideal.
-	delay: Option<u64>,
+	delay: Option<i64>,
 
 	/// The average (mean) time it took to connect and retrieve the lastsync
 	/// file from the given URL.
@@ -332,9 +332,11 @@ impl Filter for MirrorFilter {
 			Self::CompletionPercent(cmp, value) => {
 				mirror.completion_pct.partial_cmp(value) == Some(*cmp)
 			}
-			Self::RefreshDelay(cmp, value) => mirror
-				.delay
-				.map_or(false, |delay| &delay.cmp(&value.as_secs()) == cmp),
+			Self::RefreshDelay(cmp, value) => {
+				mirror.delay.map_or(false, |delay| {
+					&delay.cmp(&(value.as_secs() as i64)) == cmp
+				})
+			}
 			Self::MeanDuration(cmp, value) => {
 				mirror.duration_avg.map_or(false, |delay| {
 					delay.partial_cmp(&value.as_secs_f32()) == Some(*cmp)
